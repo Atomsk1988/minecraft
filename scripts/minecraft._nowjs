@@ -1,0 +1,214 @@
+var Minecraft = function(){
+	var mainScene = null;
+  var floorLevel = 0;
+  var hotkey = 1;
+  var building_collection = [
+    [
+      [null,null,null,null,null,null,null,],
+      [null,null,null,null,null,null,null,],
+      [null,null,null,null,null,null,null,],
+      [null,null,null,null,null,null,null,],
+      [null,null,null,null,null,null,null,],
+      [null,null,null,null,null,null,null,],
+      [null,null,null,null,null,null,null,]
+    ],[
+      [null,null,null,null,null,null,null,],
+      [null,null,null,null,null,null,null,],
+      [null,null,null,null,null,null,null,],
+      [null,null,null,null,null,null,null,],
+      [null,null,null,null,null,null,null,],
+      [null,null,null,null,null,null,null,],
+      [null,null,null,null,null,null,null,]
+    ],[
+      [null,null,null,null,null,null,null,],
+      [null,null,null,null,null,null,null,],
+      [null,null,null,null,null,null,null,],
+      [null,null,null,null,null,null,null,],
+      [null,null,null,null,null,null,null,],
+      [null,null,null,null,null,null,null,],
+      [null,null,null,null,null,null,null,]
+    ],[
+      [null,null,null,null,null,null,null,],
+      [null,null,null,null,null,null,null,],
+      [null,null,null,null,null,null,null,],
+      [null,null,null,null,null,null,null,],
+      [null,null,null,null,null,null,null,],
+      [null,null,null,null,null,null,null,],
+      [null,null,null,null,null,null,null,]
+    ],[
+      [null,null,null,null,null,null,null,],
+      [null,null,null,null,null,null,null,],
+      [null,null,null,null,null,null,null,],
+      [null,null,null,null,null,null,null,],
+      [null,null,null,null,null,null,null,],
+      [null,null,null,null,null,null,null,],
+      [null,null,null,null,null,null,null,]
+    ],[
+      [null,null,null,null,null,null,null,],
+      [null,null,null,null,null,null,null,],
+      [null,null,null,null,null,null,null,],
+      [null,null,null,null,null,null,null,],
+      [null,null,null,null,null,null,null,],
+      [null,null,null,null,null,null,null,],
+      [null,null,null,null,null,null,null,]
+    ],[
+      [null,null,null,null,null,null,null,],
+      [null,null,null,null,null,null,null,],
+      [null,null,null,null,null,null,null,],
+      [null,null,null,null,null,null,null,],
+      [null,null,null,null,null,null,null,],
+      [null,null,null,null,null,null,null,],
+      [null,null,null,null,null,null,null,]
+    ]
+  ];
+//stage
+  CubicVR.start('auto',webGLStart);
+
+	function webGLStart(gl,canvas) {
+  /*var CubicVR = CubicVR.init({
+      canvas: canvas,
+      context: contextName
+    });*/
+
+  /*var boxMaterial1 = new CubicVR.Material({
+      textures: { color: "images/grass.png" }
+    });
+    */
+    var boxMesh = new CubicVR.Mesh({ 
+      primitive: {
+        type: "box",
+        size: 1.0,
+        material: {
+          textures: {
+            color: "images/dirt.png"
+          }
+        },
+        uv: {
+          projectionMode: "cubic",
+          scale: [1, 1, 1]
+        },
+        transform: {
+          position: [0,0,0]
+        }
+      },
+      compile: true
+    });
+ // var boxTexture1 = CubicVR.Texture("images/grass_top.png");
+ // boxMesh.setFaceMaterial(boxTexture1,0);
+
+  var boxObj = new CubicVR.SceneObject(boxMesh);
+  var scene = new CubicVR.Scene( canvas.width, canvas.height, 60 );
+
+  var ml = new CubicVR.MainLoop( function( timer, gl ) {
+    scene.render();
+  });
+  this.render = function() {
+    scene.render();
+  };
+  scene.bind(boxObj);
+  scene.camera.position = [0, 0, 10];
+  scene.camera.target = [0, 0, 0];
+  //CubicVR.addResizeable(scene);
+  var mvc = new CubicVR.MouseViewController( canvas, scene.camera );
+  
+  this.add = function(p){
+    x=p[0],y=p[1],z=p[2];
+    so = new CubicVR.SceneObject({mesh:boxMesh, position:p});
+    scene.bindSceneObject(so);
+    building_collection[x][y][z] = so;
+  }
+  this.delete = function(p){
+    x=p[0],y=p[1],z=p[2];
+    so = building_collection[x][y][z];
+    scene.removeSceneObject(so);
+    building_collection[x][y][z] = null;
+  }
+  mainScene = scene;
+} 
+//desk
+	(function(){
+		$('#desk').svg({onLoad: function(svg){
+      defs = svg.defs(); 
+      var ptn = svg.pattern(defs, 'boxPattern', 0, 0, 36, 36, 0, 0, 36, 36, 
+        {patternUnits: 'userSpaceOnUse'});
+      var img = svg.image(ptn,0, 0, 36, 36, 'images/deskSlot.png'); 
+
+      
+      var hotKey_patt = svg.pattern(defs, 'hotKeyPattern', 0, 5, 36, 36, 0, 0, 36, 36, 
+        {patternUnits: 'userSpaceOnUse'});  
+      //objectBoundingBox
+      var img = svg.image(hotKey_patt,0, 0, 36, 36, 'images/deskSlot.png'); 
+
+      var rect = svg.rect(defs, 0, 0, 36, 36, {
+        id: 'box', 
+        fill: 'url(#boxPattern)', 
+        stroke: 'black', 
+        stokeWidth: '1px',
+        strokeOpacity: '0',
+        pos: null,
+        val: false
+      }); 
+      var hotkeyRect = svg.rect(defs,0, 0, 36, 36, {
+        id: 'hotkeyRect', 
+        fill: 'url(#hotKeyPattern)', 
+        stroke: 'black', 
+        stokeWidth: '1px',
+        strokeOpacity: '0',
+        itemSlot: null
+      });
+
+      //var  hotkeyImg  = svg.image(hotkeyRect,0, 257, 36, 36, 'images/hierba.png'); 
+      //var hotkeys = svg.group('hotkeys',{width: 360, height: 36,x: 0, y: 257, fill: 'black'})
+
+      surface = 7;
+      for(m=0;m<surface;m++){
+        for(n=0;n<surface;n++){
+          svg.change(rect,{x: 36*n, y: 36*m,pos: [n,0,m]});
+          b = svg.add('#box');
+        }
+      }
+
+
+      for(n=1;n<=9;n++){
+          svg.configure(hotkeyRect,{id: 'itemSlot'+n,x: 36*(n-1), y: 257, itemSlot: n, class: 'itemSlot'});
+          b = svg.add(hotkeyRect);
+          img = svg.add(svg.image(36*(n-1), 257, 36, 36, 'images/hierba.png',{id: 'itemSlotImage'+n,class: 'slotImage'}));
+
+      }
+      var imageSlot  = svg.image(-6, 252, 48, 45, 'images/hotkeyslot.png',{id: 'hotkeySlot'});
+      $('.slotImage').bind('click',function(e){
+        id = e.currentTarget.id;
+        id = id.charAt(id.length - 1);
+        hotkey = id;
+        x = (id*36)-42;
+        svg.change(imageSlot,{x: x}); 
+      });
+
+      $('rect').bind('click',function(e){
+      	t = $(e.currentTarget);
+        val = t.attr('val');
+        pos = $(t).attr('pos');
+        pos = pos.split(',');
+        pos[1] = floorLevel;
+        if(val==='true'){
+          t.attr('val','false');
+          console.log('True: '+pos);
+          mainScene.delete(pos);
+        }else{
+          t.attr('val','true');
+          console.log('False: '+pos);
+          mainScene.add(pos);
+        }
+      });
+    }, settings: {width:500}});
+	})();
+
+  (function(){
+    $('#floorLevel').bind('change',function(e){     
+        floorLevel = e.currentTarget.value;
+        
+        console.log(floorLevel); 
+    });
+  })();
+	
+}
