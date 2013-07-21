@@ -172,21 +172,25 @@ var Minecraft = function(init){
         }
         if(direction[0]+direction[2]!=0){//si no hay diferencia en x e y no hacemos nada
           if(direction[0]<0 && direction[2]==0){
-            //dir = 'left';
-            dir.vertical = false;
+            //up
+            console.log('up');
+            dir.vertical = true;
             dir.direction = false;
           }else if(direction[0]>0 && direction[2]==0){
-            //dir = 'right';
-            dir.vertical = false;
+            //down
+            console.log('down');
+            dir.vertical = true;
             dir.direction = true;
           }else if(direction[0]==0 && direction[2]<0){
-            //dir = 'up';
-            dir.vertical = true;
-            dir.direction = true;
-          }else if(direction[0]==0 && direction[2]>0){
-            //dir = 'down';
-            dir.vertical = true;
+            //left
+            console.log('left');
+            dir.vertical = false;
             dir.direction = false;
+          }else if(direction[0]==0 && direction[2]>0){
+            //right
+            console.log('right');
+            dir.vertical = false;
+            dir.direction = true;
           }  
         }
         $('body').off('mouseup', '.deskSlotImage',rotate_release);
