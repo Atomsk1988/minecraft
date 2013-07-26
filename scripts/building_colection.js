@@ -15,6 +15,13 @@ var buildingData = function(){
     },
     delete:function(z,y,x){
       this[z][y][x] = null;
+    },
+    clean:function(){
+      this.map(function(element, index){
+        if(typeof index=='number'){
+          if(element.rotation == [0,0,0])element.rotation = null;
+        }
+      });
     }
   }
   return ob;

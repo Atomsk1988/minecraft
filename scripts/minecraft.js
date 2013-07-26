@@ -208,7 +208,6 @@ var Minecraft = function(init){
         
         if(state == true && target_href==empty){//Origin and target empty
           //Adds a cube to desk & stage
-          console.log('baka!');
           svg.change(target,{href:items[item_id].image});
           addi.push({'pos':pos,'id':item_id});
         }else if(state == false && target_href!=empty){//Origin full target full 
@@ -279,6 +278,29 @@ var Minecraft = function(init){
             if(floor[j][m]!=null){
               console.log(j,m);
               $(".deskSlotImage[pos='"+j+",0,"+m+"']").trigger('mousedown',floor[j][m].id);//y,z,x
+              //******************
+              //llamamos a rotate?(/updateStage, luego)
+              /*
+              La cosa es llamar a a updateStage, con la configuracion de rotate
+              pero, en el objeto tenemos que incluir ini y una propiedad 'value'
+              con el valor directo.
+              */
+              //******************
+              
+
+
+              //parece que hay un problema a la hora de evitar que haya rotacion en [0,0,0] cases
+
+              
+              if(floor[j][m].rotation!=null){
+                console.log(floor[j][m].rotation);
+                var rotate_ob = {
+                  ini:floor[j][m].position,
+                  value:floor[j][m].rotation
+                }
+                
+                stage.updateStage(rotate_ob,{rotation:true})
+              }
             }
           }
         }
@@ -311,7 +333,6 @@ var Minecraft = function(init){
         $('#library_load').on('click', function(){
           stage.delete('*');
           desk.clean();
-          coso = $('.library_selected')
           var id = $('.library_selected').attr('id');
           if(id!=null){
             id = id.substr(2);
@@ -326,7 +347,27 @@ var Minecraft = function(init){
                   if(data[z][y]!=null){
                   for(x=0;x<data[z][y].length;x++){
                     if(data[z][y][x]!=null){
-                      o.add.push({'pos':data[z][y][x].position,'id':data[z][y][x].id});
+                      data_object = {'pos':data[z][y][x].position,'id':data[z][y][x].id}
+                      
+                      //******************
+                      //llamamos a rotate?(/updateStage, luego)
+                      /*
+                      La cosa es llamar a a updateStage, con la configuracion de rotate
+                      pero, en el objeto tenemos que incluir ini y una propiedad 'value'
+                      con el valor directo.
+                      */
+                      //******************
+                      if(data[z][y][x].rotation!=null){
+                        data_object.rotation = data[z][y][x].rotation;
+                        /*var rotate_ob = {
+                          ini:data[z][y][x].position,
+                          value:data[z][y][x].rotation
+                        }
+                       
+                        stage.updateStage(rotate_ob,{rotation:true})
+                        */
+                      }
+                      o.add.push(data_object);
                     }
                     
                   }
@@ -530,41 +571,40 @@ var Minecraft = function(init){
           });
         }
       }
-      //for(n in p){
-        if(n!='state'){
-          //console.log('_______');
-          k = o.id;//hotkeys.slot has the slot index and hotkeys[index] the item id
-          x=o.pos[0],y=o.pos[2],z=o.pos[1];
-
-          mat = items[k].texture;
-          createNewMaterial(mat);//base material prop
-          var mesh =mesh_builder(items[k].mesh, materials[mat]);
-
-          //If faces is setted create a material for each face
-          if(items[k].faces != null){
-            faces = items[k].faces;
-            for(n in faces){
-              if(faces[n]!=null){// if face material is no set it uses thetexture property
-                createNewMaterial(faces[n]);//specific faces materials
-                mesh.setFaceMaterial(materials[items[k].faces[n]],n);
-              }
-            }
-          }
-          mesh.prepare();
-          so = new CubicVR.SceneObject({mesh:mesh, position:o.pos});
-          so.itemid = k;
-          //console.log(so);
-          scene.bindSceneObject(so);
           
-          //console.log('-_-'+k,floorLevel,y,x);
-          if(setZ==undefined){
-            z= floorLevel;
+      //console.log('_______');
+      k = o.id;//hotkeys.slot has the slot index and hotkeys[index] the item id
+      x=o.pos[2],y=o.pos[1],z=o.pos[0];
+
+      mat = items[k].texture;
+      createNewMaterial(mat);//base material prop
+      var mesh =mesh_builder(items[k].mesh, materials[mat]);
+
+      //If faces is setted create a material for each face
+      if(items[k].faces != null){
+        faces = items[k].faces;
+        for(n in faces){
+          if(faces[n]!=null){// if face material is no set it uses thetexture property
+            createNewMaterial(faces[n]);//specific faces materials
+            mesh.setFaceMaterial(materials[items[k].faces[n]],n);
           }
-          building_collection[z][y][x] = so;
-          building_data.push(so, z,y,x);
         }
+      }
+      mesh.prepare();
+      so = new CubicVR.SceneObject({mesh:mesh, position:o.pos, rotation:[0,0,0]});
+      console.log(so);
+      so.itemid = k;
+      //if(o.rotation!=null)so.rotation=o.rotation;
+      //console.log(so);
+      scene.bindSceneObject(so);
+      
+      //console.log('-_-'+k,floorLevel,y,x);
+      if(setZ==undefined){
+        z= floorLevel;
+      }
+      building_collection[z][y][x] = so;
+      building_data.push(so, z,y,x);
         
-      //}
     }
     //3d remove function
     this.delete = function(p){
@@ -598,25 +638,29 @@ var Minecraft = function(init){
 
     //block rotation function
     this.rotate = function(o){
-      //console.log('Stage rotation function',o);
-      x=parseInt(o.ini[2]),y=parseInt(o.ini[0]),z=parseInt(o.ini[1]);
-      so = building_collection[floorLevel][y][x];
-      //so.rotation = [0.0,0+90.0,0.0]
-      rot = so.rotation;
-      //console.log(rot);
-      if(o.dir.vertical==true && o.dir.direction==false){//turn down
-        rot = [rot[0]-90.0, rot[1],rot[2]]
-      }else if(o.dir.vertical==true && o.dir.direction==true){//up
-        rot = [rot[0]+90.0, rot[1],rot[2]];
-      }else if(o.dir.vertical==false && o.dir.direction==false){//left
-        rot = [rot[0], rot[1]+90.0,rot[2]];
-      }else if(o.dir.vertical==false && o.dir.direction==true){//right
-        rot = [rot[0], rot[1]-90.0,rot[2]];
+      console.log(o);
+      x=parseInt(o.ini[0]),y=parseInt(o.ini[1]),z=parseInt(o.ini[2]);
+      rotation_ob = building_collection[z][y][x];//Eso deberia ser z y no floorlevel no?
+
+      if(o.value==undefined){
+        //console.log('Stage rotation function',o);
+        rot = rotation_ob.rotation;
+        if(o.dir.vertical==true && o.dir.direction==false){//turn down
+          rot = [rot[0]-90.0, rot[1],rot[2]]
+        }else if(o.dir.vertical==true && o.dir.direction==true){//up
+          rot = [rot[0]+90.0, rot[1],rot[2]];
+        }else if(o.dir.vertical==false && o.dir.direction==false){//left
+          rot = [rot[0], rot[1]+90.0,rot[2]];
+        }else if(o.dir.vertical==false && o.dir.direction==true){//right
+          rot = [rot[0], rot[1]-90.0,rot[2]];
+        }
+      }else{
+        rot = o.value;
       }
-     // console.log(rot);
-      so.rotation = rot;
-      building_collection[floorLevel][y][x] = so;
-      building_data.push(so, floorLevel,y,x);
+      console.log(rotation_ob);
+      rotation_ob.rotation = rot;
+      building_collection[z][y][x] = rotation_ob;
+      building_data.push(rotation_ob, z,y,x);
 
      // console.log(so.rotation);
     }
@@ -625,9 +669,11 @@ var Minecraft = function(init){
       if(extra.rotation==undefined)extra.rotation = false;
       if(extra.setZ==undefined)setZ = false;
       //console.log(o);
+      //Deberia crear los objectos y luego de ser necesario llamar a 
+      //rotate, en vez de elejir entre uno de los dos.
 
       if(extra.rotation==true){
-        //console.log('rotate!');
+        //console.log('rotate!', o, extra);
         this.rotate(o);
       }else{
         o.del.map(function(element){
@@ -697,7 +743,7 @@ var Minecraft = function(init){
     console.log('-_-'+canvas.width);
     var pixels = new Uint8Array(canvas.width*canvas.height*4); // 800*600 *4-RGBA image
     ctx.readPixels(0, 0, canvas.width, canvas.height, ctx.RGBA, ctx.UNSIGNED_BYTE, pixels);
-
+    building_data.clean();
     worker.postMessage([pixels,JSON.stringify(building_data)]);
     
     return true;
